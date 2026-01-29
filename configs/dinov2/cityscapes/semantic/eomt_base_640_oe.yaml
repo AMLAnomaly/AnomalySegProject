@@ -1,0 +1,53 @@
+trainer:
+  max_epochs: 10
+  callbacks:
+    - class_path: lightning.pytorch.callbacks.ModelCheckpoint
+      init_args:
+        save_top_k: -1
+        save_last: true
+        every_n_epochs: 1
+        filename: "cityscapes-epoch-{epoch:02d}-{step:06d}"
+  logger:
+    class_path: lightning.pytorch.loggers.wandb.WandbLogger
+    init_args:
+      resume: allow
+      project: "OutlierExposureFinetuningFINALE"
+      entity: "AML-team"
+      name: "OE_ROAD_ONLY&PERSPECTIVE_SCALE_run1"
+      tags: ["Stefano", "ROAD_ONLY&PERSPECTIVE_SCALE" , "Run1"]
+      save_dir: "/content/drive/MyDrive/OutlierExposure/logs"
+model:
+  class_path: training.mask_classification_semantic.MaskClassificationSemantic
+  init_args:
+    attn_mask_annealing_enabled: True
+    attn_mask_annealing_start_steps: [1401, 3501, 5602]
+    attn_mask_annealing_end_steps:   [2801, 4902, 7000]
+    # Learning parameters
+    lr: 1.0e-4
+    weight_decay: 0.05
+    # OE Params
+    outlier_loss_enabled: True
+    outlier_weight: 1.0
+    outlier_loss_target: "nls"
+    outlier_loss_func: "squared_hinge"
+    inlier_upper_threshold: -0.75
+    outlier_lower_threshold: -0.10
+    score_norm: "tanh"
+    network:
+      class_path: models.eomt.EoMT
+      init_args:
+        num_q: 100
+        num_blocks: 3
+        masked_attn_enabled: True
+        encoder:
+          class_path: models.vit.ViT
+          init_args:
+            backbone_name: vit_base_patch14_reg4_dinov2
+data:
+  class_path: datasets.cityscapes_semantic.CityscapesSemantic
+  init_args:
+     # OE Params
+    oe_enabled: True
+    coco_root: "datasets/coco"
+    ood_prob: 0.2
+    coco_split: "val"

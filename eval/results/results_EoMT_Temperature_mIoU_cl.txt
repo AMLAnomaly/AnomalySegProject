@@ -1,0 +1,6 @@
+=======================================
+Subset: val
+Temperature 0.5: Mean IoU = 81.79%
+Temperature 0.75: Mean IoU = 81.76%
+Temperature 1.0: Mean IoU = 81.68%
+Temperature 1.1: Mean IoU = 81.66%
